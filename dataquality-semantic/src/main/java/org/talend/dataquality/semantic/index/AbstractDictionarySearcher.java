@@ -115,13 +115,13 @@ public abstract class AbstractDictionarySearcher {
      * @return a list of lower-case tokens which strips accents & punctuation
      * @throws IOException
      */
-    public static List<String> getTokensFromAnalyzer(String input) {
+    public static List<String> getTokensFromAnalyzer2(String input) { // *La Réunion//*Talénd //.fr
         StandardTokenizer tokenStream = new StandardTokenizer(new StringReader(input));
         TokenStream result = new StandardFilter(tokenStream);
         result = new LowerCaseFilter(result);
         result = new ASCIIFoldingFilter(result);
         CharTermAttribute charTermAttribute = result.addAttribute(CharTermAttribute.class);
-        List<String> termList = new ArrayList<String>();
+        List<String> termList = new ArrayList<String>(); // la, reunion // talend // fr
         try {
             tokenStream.reset();
             while (result.incrementToken()) {
@@ -134,9 +134,20 @@ public abstract class AbstractDictionarySearcher {
         }
         if (termList.size() == 1) { // require exact match when the input has only one token
             termList.clear();
-            termList.add(StringUtils.stripAccents(input.toLowerCase()));
+            termList.add(StringUtils.stripAccents(input.toLowerCase()));// *talend //.fr
         }
         return termList;
     }
 
+    public static List<String> getTokensFromAnalyzer(String input) { // *La Réunion//*Talénd //.fr
+        List<String> termList = new ArrayList<String>(); // la, reunion // talend // fr
+        String str = StringUtils.stripAccents(input.toLowerCase());
+        String[] tokens = str.split("[ \\-–\\(\\)&]");
+        for (String t : tokens) {
+            if (t.length() > 0) {
+                termList.add(t);
+            }
+        }
+        return termList;
+    }
 }
