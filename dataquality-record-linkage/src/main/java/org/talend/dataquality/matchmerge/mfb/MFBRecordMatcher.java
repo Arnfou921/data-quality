@@ -82,7 +82,18 @@ public class MFBRecordMatcher extends AbstractRecordMatcher {
             }
             return MFB.NonMatchResult.wrap(result);
         }
+        synRecord2ConFidence(record2, normalizedConfidence);
         return result;
+    }
+
+    /**
+     * DOC zshen Comment method "synRecord2ConFidence".
+     * 
+     * @param record2
+     * @param normalizedConfidence
+     */
+    protected void synRecord2ConFidence(Record record2, double normalizedConfidence) {
+        record2.setConfidence(normalizedConfidence);
     }
 
     private static double matchScore(Attribute leftAttribute, Attribute rightAttribute, IAttributeMatcher matcher) {

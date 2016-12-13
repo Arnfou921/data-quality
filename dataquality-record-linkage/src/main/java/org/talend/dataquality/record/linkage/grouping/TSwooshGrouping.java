@@ -237,6 +237,9 @@ public class TSwooshGrouping<TYPE> {
             RichRecord richRecord1 = (RichRecord) record1;
             RichRecord richRecord2 = (RichRecord) record2;
 
+            richRecord1.setConfidence(richRecord1.getScore());
+            richRecord2.setConfidence(richRecord2.getScore());
+
             String grpId1 = richRecord1.getGroupId();
             String grpId2 = richRecord2.getGroupId();
             if (grpId1 == null && grpId2 == null) {
@@ -250,9 +253,6 @@ public class TSwooshGrouping<TYPE> {
 
                 richRecord1.setMaster(false);
                 richRecord2.setMaster(false);
-
-                richRecord1.setConfidence(richRecord1.getScore());
-                richRecord2.setConfidence(richRecord2.getScore());
 
                 output(richRecord1);
                 output(richRecord2);
@@ -582,6 +582,9 @@ public class TSwooshGrouping<TYPE> {
             // record1 and record2 must be RichRecord from DQ grouping implementation.
             RichRecord richRecord1 = (RichRecord) record1;
             RichRecord richRecord2 = (RichRecord) record2;
+
+            richRecord1.setConfidence(richRecord1.getScore());
+            richRecord2.setConfidence(richRecord2.getScore());
 
             String grpId1 = richRecord1.getGroupId();
             String grpId2 = richRecord2.getGroupId();
