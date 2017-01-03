@@ -30,9 +30,9 @@ public class GenerateUniqueSsnUs extends AbstractGenerateUniqueSsn {
         List<String> firstField = new ArrayList<String>();
         for (int i = 1; i < 900; i++) {
             if (i < 10)
-                firstField.add("00" + i);
+                firstField.add("00" + String.valueOf(i));
             else if (i < 100)
-                firstField.add("0" + i);
+                firstField.add("0" + String.valueOf(i));
             else if (i != 666)
                 firstField.add(String.valueOf(i));
         }
