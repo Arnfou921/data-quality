@@ -25,5 +25,5 @@ public interface Index {
 
     Set<String> findCategories(String data);
 
-    boolean validCategory(String data, String semanticType);
+    boolean validCategory(String data, Set<String> semanticType);
 }

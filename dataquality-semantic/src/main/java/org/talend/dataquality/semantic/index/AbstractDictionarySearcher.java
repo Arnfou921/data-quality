@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -15,6 +16,7 @@ import org.apache.lucene.analysis.standard.StandardTokenizer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.Term;
+import org.apache.lucene.queries.TermsFilter;
 import org.apache.lucene.search.*;
 
 /**
@@ -106,6 +108,20 @@ public abstract class AbstractDictionarySearcher {
             booleanQuery.add(getTermQuery(F_SYNTERM, tokens.get(i), false), BooleanClause.Occur.SHOULD);
         }
         return booleanQuery;
+    }
+
+    /**
+     *
+     * @param semanticTypes
+     * @return
+     * @throws IOException
+     */
+    protected Filter createFilterForSemanticTypes(Set<String> semanticTypes) {
+        List<Term> terms = new ArrayList<>();
+        for (String semanticType : semanticTypes) {
+            terms.add(new Term(F_WORD, semanticType));
+        }
+        return new TermsFilter(terms);
     }
 
     public static String getJointTokens(String input) {

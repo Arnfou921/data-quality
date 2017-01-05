@@ -52,7 +52,7 @@ public class DataDictFieldClassifier implements ISubCategoryClassifier {
     }
 
     @Override
-    public boolean validCategory(String data, String semanticType) {
+    public boolean validCategory(String data, Set<String> semanticType) {
         StringTokenizer t = new StringTokenizer(data, " ");
         final int tokenCount = t.countTokens();
 

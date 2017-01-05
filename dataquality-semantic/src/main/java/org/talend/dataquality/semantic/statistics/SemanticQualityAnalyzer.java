@@ -13,9 +13,7 @@
 package org.talend.dataquality.semantic.statistics;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.apache.log4j.Logger;
 import org.talend.dataquality.common.inference.Analyzer;
@@ -124,8 +122,10 @@ public class SemanticQualityAnalyzer extends QualityAnalyzer<ValueQualityStatist
             valueQuality.incrementValid();
             return;
         }
+        Set<String> catNames = new TreeSet<String>();
+        catNames.add(catName);
         if (cat.getCompleteness() != null && cat.getCompleteness().booleanValue()) {
-            if (isValid(catName, cat.getType(), value)) {
+            if (isValid(catNames, cat.getType(), value)) {
                 valueQuality.incrementValid();
             } else {
                 valueQuality.incrementInvalid();
@@ -136,12 +136,12 @@ public class SemanticQualityAnalyzer extends QualityAnalyzer<ValueQualityStatist
         }
     }
 
-    private boolean isValid(String catName, CategoryType catType, String value) {
-        LFUCache<String, Boolean> categoryCache = knownValidationCategoryCache.get(catName);
+    private boolean isValid(Set<String> catNames, CategoryType catType, String value) {
+        LFUCache<String, Boolean> categoryCache = knownValidationCategoryCache.get(catNames.toString());
 
         if (categoryCache == null) {
             categoryCache = new LFUCache<String, Boolean>(10, 1000, 0.01f);
-            knownValidationCategoryCache.put(catName, categoryCache);
+            knownValidationCategoryCache.put(catNames.toString(), categoryCache);
         } else {
             final Boolean isValid = categoryCache.get(value);
             if (isValid != null) {
@@ -151,10 +151,10 @@ public class SemanticQualityAnalyzer extends QualityAnalyzer<ValueQualityStatist
         boolean validCat = false;
         switch (catType) {
         case REGEX:
-            validCat = regexClassifier.validCategory(value, catName);
+            validCat = regexClassifier.validCategory(value, catNames);
             break;
         case DICT:
-            validCat = dataDictClassifier.validCategory(value, catName);
+            validCat = dataDictClassifier.validCategory(value, catNames);
             break;
         default:
             break;

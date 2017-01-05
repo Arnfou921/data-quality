@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.apache.lucene.document.Document;
@@ -115,7 +116,14 @@ public class DictionarySearcher extends AbstractDictionarySearcher {
         return doc;
     }
 
-    public boolean validDocumentWithCategory(String stringToSearch, String semanticType) throws IOException {
+    /**
+     *
+     * @param stringToSearch
+     * @param semanticTypes has to be a TreeSet to be ordered.
+     * @return
+     * @throws IOException
+     */
+    public boolean validDocumentWithCategory(String stringToSearch, Set<String> semanticTypes) throws IOException {
         Query query;
         switch (searchMode) {
         case MATCH_SEMANTIC_DICTIONARY:
@@ -129,10 +137,10 @@ public class DictionarySearcher extends AbstractDictionarySearcher {
             break;
         }
         final IndexSearcher searcher = mgr.acquire();
-        CachingWrapperFilter tmp = categoryToCache.get(semanticType);
+        CachingWrapperFilter tmp = categoryToCache.get(semanticTypes.toString());
         if (tmp == null) {
-            tmp = new CachingWrapperFilter(new FieldCacheTermsFilter(F_WORD, semanticType));
-            categoryToCache.put(semanticType, tmp);
+            tmp = new CachingWrapperFilter(createFilterForSemanticTypes(semanticTypes));
+            categoryToCache.put(semanticTypes.toString(), tmp);
         }
         boolean validDocument = searcher.search(query, tmp, 1).totalHits != 0;
         mgr.release(searcher);

@@ -78,17 +78,23 @@ public class UserDefinedClassifier extends AbstractSubCategoryClassifier {
     }
 
     @Override
-    public boolean validCategory(String str, String semanticType) {
+    public boolean validCategory(String str, Set<String> semanticTypes) {
         MainCategory mainCategory = MainCategory.getMainCategory(str);
-        return validCategory(str, mainCategory, semanticType);
+        return validCategory(str, mainCategory, semanticTypes);
     }
 
-    private boolean validCategory(String str, MainCategory mainCategory, String semanticType) {
-        if (mainCategory != MainCategory.UNKNOWN && mainCategory != MainCategory.NULL && mainCategory != MainCategory.BLANK) {
-            for (ISubCategory classifier : potentialSubCategories) {
-                if (semanticType.equals(classifier.getName())) {
-                    return isValid(str, mainCategory, (UserDefinedCategory) classifier);
-                }
+    private boolean validCategory(String str, MainCategory mainCategory, Set<String> semanticTypes) {
+        int cpt = 0;
+        if (mainCategory == MainCategory.UNKNOWN || mainCategory == MainCategory.NULL || mainCategory == MainCategory.BLANK) {
+            return false;
+        }
+        for (ISubCategory classifier : potentialSubCategories) {
+            if (semanticTypes.contains(classifier.getName())) {
+                cpt++;
+                if (isValid(str, mainCategory, (UserDefinedCategory) classifier))
+                    return true;
+                if (cpt == semanticTypes.size())
+                    return false;
             }
         }
         return false;
