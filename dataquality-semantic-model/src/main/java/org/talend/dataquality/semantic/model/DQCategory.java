@@ -52,6 +52,16 @@ public class DQCategory {
 
     private Boolean completeness;
 
+    private String upperTypeId;
+
+    public String getUpperTypeId() {
+        return upperTypeId;
+    }
+
+    public void setUpperTypeId(String upperTypeId) {
+        this.upperTypeId = upperTypeId;
+    }
+
     public String getId() {
         return id;
     }

@@ -14,6 +14,7 @@ package org.talend.dataquality.semantic.index;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -70,6 +71,11 @@ public class LuceneIndex implements Index {
             LOG.error(e, e);
         }
         return foundCategorySet;
+    }
+
+    @Override
+    public boolean validCategory(String data, String semanticType) {
+        return validCategory(data, Collections.singleton(semanticType));
     }
 
     @Override

@@ -99,6 +99,8 @@ public class DictionaryUtils {
         dqCat.setCompleteness(Boolean.valueOf(doc.getField(DictionaryConstants.COMPLETENESS).stringValue()));
         dqCat.setDescription(doc.getField(DictionaryConstants.DESCRIPTION) == null ? ""
                 : doc.getField(DictionaryConstants.DESCRIPTION).stringValue());
+        dqCat.setUpperTypeId(doc.getField(DictionaryConstants.UPPERTYPEID) == null ? ""
+                : doc.getField(DictionaryConstants.UPPERTYPEID).stringValue());
         return dqCat;
     }
 
@@ -111,6 +113,7 @@ public class DictionaryUtils {
         doc.add(new StringField(DictionaryConstants.COMPLETENESS, String.valueOf(cat.getCompleteness().booleanValue()),
                 Field.Store.YES));
         doc.add(new TextField(DictionaryConstants.DESCRIPTION, cat.getDescription(), Field.Store.YES));
+        doc.add(new TextField(DictionaryConstants.UPPERTYPEID, cat.getUpperTypeId(), Field.Store.YES));
         return doc;
     }
 

@@ -12,6 +12,7 @@
 // ============================================================================
 package org.talend.dataquality.semantic.classifier.impl;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.StringTokenizer;
@@ -49,6 +50,11 @@ public class DataDictFieldClassifier implements ISubCategoryClassifier {
         }
 
         return result;
+    }
+
+    @Override
+    public boolean validCategory(String data, String semanticType) {
+        return validCategory(data, Collections.singleton(semanticType));
     }
 
     @Override

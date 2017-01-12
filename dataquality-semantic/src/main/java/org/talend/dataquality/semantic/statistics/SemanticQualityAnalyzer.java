@@ -122,10 +122,8 @@ public class SemanticQualityAnalyzer extends QualityAnalyzer<ValueQualityStatist
             valueQuality.incrementValid();
             return;
         }
-        Set<String> catNames = new TreeSet<String>();
-        catNames.add(catName);
         if (cat.getCompleteness() != null && cat.getCompleteness().booleanValue()) {
-            if (isValid(catNames, cat.getType(), value)) {
+            if (isValid(Collections.singleton(catName), cat.getType(), value)) {
                 valueQuality.incrementValid();
             } else {
                 valueQuality.incrementInvalid();

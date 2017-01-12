@@ -12,6 +12,7 @@
 // ============================================================================
 package org.talend.dataquality.semantic.classifier.custom;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -75,6 +76,11 @@ public class UserDefinedClassifier extends AbstractSubCategoryClassifier {
     public Set<String> classify(String str) {
         MainCategory mainCategory = MainCategory.getMainCategory(str);
         return classify(str, mainCategory);
+    }
+
+    @Override
+    public boolean validCategory(String value, String semanticType) {
+        return validCategory(value, Collections.singleton(semanticType));
     }
 
     @Override

@@ -28,5 +28,7 @@ public interface ISubCategoryClassifier extends Serializable {
      */
     public Set<String> classify(String str);
 
+    boolean validCategory(String value, String semanticType);
+
     boolean validCategory(String value, Set<String> semanticType);
 }
