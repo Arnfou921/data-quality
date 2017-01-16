@@ -21,13 +21,28 @@ import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.analysis.util.CharArraySet;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.document.Field;
+import org.apache.lucene.document.FieldType;
+import org.apache.lucene.document.StringField;
+import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.index.KeepOnlyLastCommitDeletionPolicy;
+import org.apache.lucene.index.Term;
+import org.apache.lucene.index.UpgradeIndexMergePolicy;
+import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.store.FSDirectory;
+import org.apache.lucene.util.Version;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -121,6 +136,136 @@ public class SynonymIndexSearcherTest {
         }
 
         searcher.close();
+    }
+
+    /**
+     * Test method for {@link SynonymIndexSearcher#searchDocumentByWord(String)}.
+     * 
+     * @throws IOException
+     */
+    @Test
+    public void testSearchDocumentByWord_2() throws IOException {
+        // SynonymIndexSearcher searcher = new SynonymIndexSearcher();
+        IndexSearcher searcher = null;
+        try {
+
+            FSDirectory indexDir = FSDirectory.open(new File("C:/Users/talend/Desktop/test/data-my"));
+
+            StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_4_10_0);
+            IndexWriterConfig iwc = new IndexWriterConfig(Version.LUCENE_4_10_0, analyzer);
+            IndexWriter writer = new IndexWriter(indexDir, iwc);
+            Set st = new HashSet();
+            st.add("Tirana");
+            st.add("ALB");
+            st.add("ALBania");
+            st.add("LIQIONG");
+            st.add("asdf");
+            st.add("poiu");
+            // writer.updateDocument(new Term(SynonymIndexSearcher.F_WORDTERM, "bl"), doc);
+
+            // writer.deleteDocuments(new TermQuery(new Term(SynonymIndexSearcher.F_WORD, "a1")));
+            writer.deleteDocuments(new Term(SynonymIndexSearcher.F_WORD, "a0"));
+            // writer.forceMergeDeletes();
+            // for (int i = 0; i < 4; i++) {
+            // Document doc = generateDocument("a" + i, st);
+            // writer.addDocument(doc);
+            // }
+            // writer.commit();
+            writer.close(true);
+            indexDir.close();
+
+            FSDirectory indexDir2 = FSDirectory.open(new File("C:/Users/talend/Desktop/test/data-my"));
+            IndexReader reader = DirectoryReader.open(indexDir2);
+            searcher = new IndexSearcher(reader);
+            int numDocs = reader.numDocs();
+            Set<String> fieldsName = new HashSet<String>();
+            reader.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        // searcher.close();
+    }
+
+    @Test
+    public void testSearchDocumentByWord_4() throws IOException {
+        // SynonymIndexSearcher searcher = new SynonymIndexSearcher();
+        IndexSearcher searcher = null;
+        try {
+
+            FSDirectory indexDir = FSDirectory.open(new File(
+                    "C:/Users/talend/Desktop/test/data-63/synonym/idx_country/idx_country_codes/idx_ISO2_country_name"));
+
+            StandardAnalyzer analyzer = new StandardAnalyzer(CharArraySet.EMPTY_SET);
+            IndexWriterConfig iwc = new IndexWriterConfig(Version.LATEST, analyzer);
+            iwc.setIndexDeletionPolicy(new KeepOnlyLastCommitDeletionPolicy());
+            iwc.setMergePolicy(new UpgradeIndexMergePolicy(iwc.getMergePolicy()));
+            // iwc.setOpenMode(OpenMode.CREATE);
+            // iwc.setOpenMode(OpenMode.CREATE_OR_APPEND);
+            IndexWriter writer = new IndexWriter(indexDir, iwc);
+            Set st = new HashSet();
+            st.add("Tirana");
+            st.add("ALB");
+            st.add("ALBania");
+            st.add("LIQIONG");
+            st.add("asdf");
+            st.add("poiu");
+            Document doc = generateDocument("AL", st);
+            // writer.updateDocument(new Term(SynonymIndexSearcher.F_WORDTERM, "AL"), doc);
+
+            // writer.deleteDocuments(new TermQuery(new Term(SynonymIndexSearcher.F_WORD, "AL")));
+            writer.deleteDocuments(new Term(SynonymIndexSearcher.F_WORDTERM, "al"));
+            writer.forceMergeDeletes(true);
+            // writer.forceMergeDeletes();
+            // for (int i = 0; i < 4; i++) {
+            // Document doc = generateDocument("a" + i, st);
+            // writer.addDocument(doc);
+            // }
+            // writer.commit();
+            writer.close();
+            indexDir.close();
+
+            FSDirectory indexDir2 = FSDirectory.open(new File(
+                    "C:/Users/talend/Desktop/test/data-63/synonym/idx_country/idx_country_codes/idx_ISO2_country_name"));
+            IndexReader reader = DirectoryReader.open(indexDir2);
+            searcher = new IndexSearcher(reader);
+            int numDocs = reader.numDocs();
+            Set<String> fieldsName = new HashSet<String>();
+            reader.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        // searcher.close();
+    }
+
+
+
+    private Document generateDocument(String word, Set<String> synonyms) {
+        String tempWord = word.trim();
+        Document doc = new Document();
+        FieldType ft = new FieldType();
+        ft.setStored(true);
+        ft.setIndexed(true);
+        ft.setOmitNorms(true);
+        ft.freeze();
+
+        // Field wordField = new Field(SynonymIndexSearcher.F_WORD, tempWord, StringField.TYPE_STORED);
+        Field wordField = new Field(SynonymIndexSearcher.F_WORD, tempWord, ft);
+        doc.add(wordField);
+        Field wordTermField = new StringField(SynonymIndexSearcher.F_WORDTERM, tempWord.toLowerCase(), Field.Store.NO);
+        doc.add(wordTermField);
+        for (String syn : synonyms) {
+            if (syn != null) {
+                syn = syn.trim();
+                if (syn.length() > 0 && !syn.equals(tempWord)) {
+                    // doc.add(new Field(SynonymIndexSearcher.F_SYN, syn, StringField.TYPE_STORED));
+                    doc.add(new Field(SynonymIndexSearcher.F_SYN, syn, ft));
+                    doc.add(new StringField(SynonymIndexSearcher.F_SYNTERM, syn.toLowerCase(), Field.Store.NO));
+                }
+            }
+        }
+        return doc;
     }
 
     @Test
