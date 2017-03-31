@@ -12,6 +12,7 @@
 // ============================================================================
 package org.talend.survivorship.sample;
 
+import org.talend.survivorship.model.ConflictRuleDefinition;
 import org.talend.survivorship.model.RuleDefinition;
 import org.talend.survivorship.model.RuleDefinition.Function;
 import org.talend.survivorship.model.RuleDefinition.Order;
@@ -27,6 +28,11 @@ public class SampleDataConflictShortest2OtherColumnDuplicateSurvivedValue {
             new RuleDefinition(Order.SEQ, "shortest_city1", "city1", //$NON-NLS-1$ //$NON-NLS-2$
                     Function.Shortest, null, "city1", false), //$NON-NLS-1$
             new RuleDefinition(Order.SEQ, "shortest_city2", "city2", //$NON-NLS-1$ //$NON-NLS-2$
+
                     Function.Shortest, null, "city2", false) }; //$NON-NLS-1$
+
+    public static final ConflictRuleDefinition[] RULES_CONFLICT_RESOLVE = { new ConflictRuleDefinition(Order.SEQ,
+            "city1_mappingTo_city2", "city2", //$NON-NLS-1$ //$NON-NLS-2$
+            Function.MappingTo, null, "city1", false, null, true) }; //$NON-NLS-1$
 
 }

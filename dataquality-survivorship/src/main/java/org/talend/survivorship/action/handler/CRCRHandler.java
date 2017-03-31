@@ -22,6 +22,7 @@ import java.util.Set;
 import org.drools.core.util.StringUtils;
 import org.talend.survivorship.model.InputConvertResult;
 import org.talend.survivorship.model.Record;
+import org.talend.survivorship.model.SubDataSet;
 import org.talend.survivorship.model.SurvivedResult;
 
 /**
@@ -105,8 +106,8 @@ public class CRCRHandler extends AbstractChainResponsibilityHandler {
         for (Integer index : conflictDataIndexList) {
             InputConvertResult inputData = getInputData(index);
             if (this.canHandler(inputData.getInputData(), getHandlerParameter().getExpression(), index)) {
-                doHandle(index, inputData.isIsfilled() ? this.getHandlerParameter().getFillColumn()
-                        : this.getHandlerParameter().getTarColumn().getName());
+                doHandle(index, inputData.isIsfilled() ? this.getHandlerParameter().getFillColumn() : this.getHandlerParameter()
+                        .getTarColumn().getName());
                 if (this.getSuccessor() != null) {
                     // init ConflictDataIndexList for next one
                     this.getHandlerParameter().addConfDataIndex(index);
@@ -181,7 +182,7 @@ public class CRCRHandler extends AbstractChainResponsibilityHandler {
      * @return
      */
     private boolean isNeedFillColumn(Object value, String columnName) {
-        if (!columnName.equals(handlerParameter.getTarColumn().getName())) {
+        if (handlerParameter.getFillColumn() == null || !columnName.equals(handlerParameter.getTarColumn().getName())) {
             return false;
         }
         boolean ignoreBlank = handlerParameter.isIgnoreBlank();
@@ -284,6 +285,39 @@ public class CRCRHandler extends AbstractChainResponsibilityHandler {
         } else {
             return null;
         }
+    }
+
+    /**
+     * 
+     * create by zshen fill column case return empty directly.
+     * So that all of column should be tarColumn
+     * 
+     * @return
+     */
+    public Object getLongestResult(Object result) {
+        Object finalResult = result;
+        SubDataSet dataSet = (SubDataSet) this.getHandlerParameter().getDataset();
+        List<Integer> dataSetIndex = dataSet.getDataSetIndex();
+        for (Integer rowNum : dataSetIndex) {
+            Object tarInputData = this.getHandlerParameter().getTarInputData(rowNum,
+                    this.getHandlerParameter().getTarColumn().getName());
+            if (tarInputData == null) {
+                continue;
+            }
+            if (finalResult.toString().length() < tarInputData.toString().length()) {
+                finalResult = tarInputData;
+            }
+
+        }
+        return finalResult;
+
+    }
+
+    public Object getNonDupResult(Object result) {
+        if (this.getHandlerParameter().getFillColumn() != null) {
+            return StringUtils.EMPTY;
+        }
+        return getLongestResult(result);
     }
 
     /**

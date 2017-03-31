@@ -44,6 +44,7 @@ import org.talend.survivorship.sample.SampleDataConflictMostCommon2MostRecent;
 import org.talend.survivorship.sample.SampleDataConflictMostCommon2OtherSurvivedValue;
 import org.talend.survivorship.sample.SampleDataConflictMostCommonAndNoIgnoreBlank;
 import org.talend.survivorship.sample.SampleDataConflictOtherColumn2MostCommon2Constant;
+import org.talend.survivorship.sample.SampleDataConflictOtherColumn2MostCommon2ConstantEmptyDuplicate;
 import org.talend.survivorship.sample.SampleDataConflictShortest2OtherColumnDuplicateSurvivedValue;
 import org.talend.survivorship.sample.SampleDataConflictTwoNoConflictColumnGetOneSameSurvivedValue;
 import org.talend.survivorship.sample.SampleDataRegexFunction;
@@ -297,8 +298,7 @@ public class SurvivorshipManagerTest {
     @Test
     public void testRunSessionMostCommon2OtherSurvived() {
 
-        manager = new SurvivorshipManager(SampleData.RULE_PATH,
-                SampleDataConflictMostCommon2OtherSurvivedValue.PKG_NAME_CONFLICT);
+        manager = new SurvivorshipManager(SampleData.RULE_PATH, SampleDataConflictMostCommon2OtherSurvivedValue.PKG_NAME_CONFLICT);
 
         for (String str : SampleDataConflict.COLUMNS_CONFLICT.keySet()) {
             Column column = new Column(str, SampleDataConflict.COLUMNS_CONFLICT.get(str));
@@ -339,7 +339,7 @@ public class SurvivorshipManagerTest {
      * @case4 most frequent->null->constant
      * 
      * the constant is Green
-     * other column is firstName column
+     * fill column is firstName column
      * Because of there are two empty value so that we get value from firstName column.
      * Then do most common rule we get Green=2 |Tony=2| null is ignore aotomatic.It is conflict.
      * Because value "green" is The constant so that we ignore it.
@@ -386,6 +386,67 @@ public class SurvivorshipManagerTest {
     /**
      * Test method for {@link org.talend.survivorship.SurvivorshipManager#runSession(java.lang.String[][])}.
      * 
+     * @case4 most frequent->null->constant->empty duplicate sur
+     * 
+     * 1.longest on firstName so that we get confilect Tony and Lili
+     * Then find shortest on city2 column and get xian which mapping to firstName column value is Tony
+     * Final we get firstName survived value is "Tony"
+     * 
+     * 2.the constant is Green
+     * fill column is firstName column
+     * Because of there are two empty value so that we get value from firstName column.
+     * Then do most common rule we get Green=2 |Tony=2| null is ignore aotomatic.It is conflict.
+     * Because value "green" is The constant so that we ignore it.
+     * 
+     * lastName survived value is empty
+     */
+    @Test
+    public void testRunSessionOtherColumn2MostCommon2ConstantEmptyDuplicate() {
+
+        manager = new SurvivorshipManager(SampleData.RULE_PATH,
+                SampleDataConflictOtherColumn2MostCommon2ConstantEmptyDuplicate.PKG_NAME);
+
+        for (String str : SampleDataConflict.COLUMNS_CONFLICT.keySet()) {
+            Column column = new Column(str, SampleDataConflict.COLUMNS_CONFLICT.get(str));
+            if (column.getName().equals("lastName") || column.getName().equals("firstName")) { //$NON-NLS-1$
+                for (ConflictRuleDefinition element : SampleDataConflictOtherColumn2MostCommon2ConstantEmptyDuplicate.RULES_CONFLICT_RESOLVE) {
+                    if (column.getName().equals(element.getTargetColumn())) {
+                        column.getConflictResolveList().add(element);
+                    }
+                }
+            }
+            manager.getColumnList().add(column);
+        }
+        for (RuleDefinition element : SampleDataConflictOtherColumn2MostCommon2ConstantEmptyDuplicate.RULES_CONFLICT) {
+            manager.addRuleDefinition(element);
+        }
+        manager.initKnowledgeBase();
+        manager.runSession(getTableValue("/org.talend.survivorship.conflict/conflicts.csv"));
+        // 5. Retrieve results
+        // HashSet<String> conflictsOfSurvivor = manager.getConflictsOfSurvivor();
+        //        Assert.assertEquals("The size of conflictsOfSurvivor should be 1", 1, conflictsOfSurvivor.size()); //$NON-NLS-1$
+        //        Assert.assertTrue("The column of conflict should be lastName", conflictsOfSurvivor.contains("lastName")); //$NON-NLS-1$ //$NON-NLS-2$
+        Map<String, Object> survivorMap = manager.getSurvivorMap();
+        Assert.assertTrue("The SurvivorMap should not be null", survivorMap != null); //$NON-NLS-1$ 
+        Object lastNameObj = survivorMap.get("lastName"); //$NON-NLS-1$
+        Assert.assertTrue("The lastNameObj should not be null", lastNameObj != null); //$NON-NLS-1$ 
+        String resultStr2 = (String) lastNameObj;
+        Object firstNameObj = survivorMap.get("firstName"); //$NON-NLS-1$
+        Assert.assertTrue("The firstNameObj should not be null", firstNameObj != null); //$NON-NLS-1$ 
+        String resultStr1 = (String) firstNameObj;
+        // Green is our Constant value which will be setting by user after that.
+        // In fact, Tony and Green is conflict after most common rule.
+        // But Green is constant so that we don't choose it.
+        // On my side result is Green too. need now code to implement it
+        Assert.assertEquals("The resultStr should be Tony", "Tony", //$NON-NLS-1$ //$NON-NLS-2$
+                resultStr1);
+        Assert.assertEquals("The resultStr should be empty", "", //$NON-NLS-1$ //$NON-NLS-2$
+                resultStr2);
+    }
+
+    /**
+     * Test method for {@link org.talend.survivorship.SurvivorshipManager#runSession(java.lang.String[][])}.
+     * 
      * @case5 city1 column use Longest get survived value hebeihebei.
      * birthday column use most Recent get survived value 08-08-2000.
      * Althougth there are two values are 08-08-2000 but they are same so that no generate conflict
@@ -423,19 +484,28 @@ public class SurvivorshipManagerTest {
      * 
      * @case6 most frequent->longest->keep one of duplicates only
      * 
-     * now both survived values are beijing after implememt code there should keep one value and it should be shanghai
+     * now both survived values are beijing. After implememt code there should keep one value and it should be shanghai
      * Because we will use most common to generate conflict between beijing=2 and shanghai=2.
      * And use Longest to resolve conflict get final result shanghai.
      * Both city1 and city2 values are "shanghai" it is duplicte .
      * So that we just keep one of them.
      */
+    @Test
     public void testRunSessionMostCommon2Longest2keepOneOfDuplicte() {
 
         manager = new SurvivorshipManager(SampleData.RULE_PATH,
                 SampleDataConflictMostCommon2Longest2keepOneOfDuplicte.PKG_NAME_CONFLICT_TWO_TARGET_SAME_VALUE);
 
         for (String str : SampleDataConflict.COLUMNS_CONFLICT.keySet()) {
-            manager.addColumn(str, SampleDataConflict.COLUMNS_CONFLICT.get(str));
+            Column column = new Column(str, SampleDataConflict.COLUMNS_CONFLICT.get(str));
+            if (column.getName().equals("city1") || column.getName().equals("city2")) { //$NON-NLS-1$
+                for (ConflictRuleDefinition element : SampleDataConflictMostCommon2Longest2keepOneOfDuplicte.RULES_CONFLICT_RESOLVE) {
+                    if (column.getName().equals(element.getTargetColumn())) {
+                        column.getConflictResolveList().add(element);
+                    }
+                }
+            }
+            manager.getColumnList().add(column);
         }
         for (RuleDefinition element : SampleDataConflictMostCommon2Longest2keepOneOfDuplicte.RULES_CONFLICT_TWO_TARGET_SAME_RESULT) {
             manager.addRuleDefinition(element);
@@ -456,7 +526,59 @@ public class SurvivorshipManagerTest {
         Object city2Obj = survivorMap.get("city2"); //$NON-NLS-1$
         Assert.assertTrue("The city1Obj should not be null", city2Obj != null); //$NON-NLS-1$ 
         resultDate = city2Obj.toString();
-        Assert.assertEquals("The resultDate should be empty", "", //$NON-NLS-1$ //$NON-NLS-2$
+        Assert.assertEquals("The resultDate should be shanghai", "shanghai", //$NON-NLS-1$ //$NON-NLS-2$
+                resultDate);
+    }
+
+    /**
+     * Test method for {@link org.talend.survivorship.SurvivorshipManager#runSession(java.lang.String[][])}.
+     * 
+     * @case6 most frequent->shortest->keep one of duplicates only
+     * 
+     * now both survived values are beijing. After implememt code there should keep one value and it should be beijing
+     * Because we will use most common to generate conflict between beijing=2 and shanghai=2.
+     * And use Shortest to resolve conflict get final result beijing.
+     * Both city1 and city2 values are "beijing" it is duplicte .
+     * So that we just keep one of them and choose longest value in the city2 conflict values
+     * city2 is "shanghai"
+     */
+    @Test
+    public void testRunSessionMostCommon2Shortest2keepOneOfDuplicte() {
+
+        manager = new SurvivorshipManager(SampleData.RULE_PATH,
+                SampleDataConflictMostCommon2Longest2keepOneOfDuplicte.PKG_NAME_CONFLICT_TWO_TARGET_SAME_VALUE);
+
+        for (String str : SampleDataConflict.COLUMNS_CONFLICT.keySet()) {
+            Column column = new Column(str, SampleDataConflict.COLUMNS_CONFLICT.get(str));
+            if (column.getName().equals("city1") || column.getName().equals("city2")) { //$NON-NLS-1$
+                for (ConflictRuleDefinition element : SampleDataConflictMostCommon2Longest2keepOneOfDuplicte.RULES_CONFLICT_RESOLVE2) {
+                    if (column.getName().equals(element.getTargetColumn())) {
+                        column.getConflictResolveList().add(element);
+                    }
+                }
+            }
+            manager.getColumnList().add(column);
+        }
+        for (RuleDefinition element : SampleDataConflictMostCommon2Longest2keepOneOfDuplicte.RULES_CONFLICT_TWO_TARGET_SAME_RESULT) {
+            manager.addRuleDefinition(element);
+        }
+        manager.initKnowledgeBase();
+        manager.runSession(getTableValue("/org.talend.survivorship.conflict/conflicts.csv"));
+        // 5. Retrieve results
+        HashSet<String> conflictsOfSurvivor = manager.getConflictsOfSurvivor();
+        Assert.assertEquals("The size of conflictsOfSurvivor should be 2", 2, conflictsOfSurvivor.size()); //$NON-NLS-1$
+        Map<String, Object> survivorMap = manager.getSurvivorMap();
+        Assert.assertTrue("The SurvivorMap should not be null", survivorMap != null); //$NON-NLS-1$ 
+        Assert.assertTrue("The size of SurvivorMap should be 2", survivorMap.size() == 2); //$NON-NLS-1$
+        Object city1Obj = survivorMap.get("city1"); //$NON-NLS-1$
+        Assert.assertTrue("The city1Obj should not be null", city1Obj != null); //$NON-NLS-1$ 
+        String resultDate = city1Obj.toString();
+        Assert.assertEquals("The resultDate should be beijing", "beijing", //$NON-NLS-1$ //$NON-NLS-2$
+                resultDate);
+        Object city2Obj = survivorMap.get("city2"); //$NON-NLS-1$
+        Assert.assertTrue("The city1Obj should not be null", city2Obj != null); //$NON-NLS-1$ 
+        resultDate = city2Obj.toString();
+        Assert.assertEquals("The resultDate should be shanghai", "shanghai", //$NON-NLS-1$ //$NON-NLS-2$
                 resultDate);
     }
 
@@ -543,11 +665,20 @@ public class SurvivorshipManagerTest {
     @Test
     public void testRunSessionShortest2OtherColumnDuplicateSurvivedValue() {
 
-        manager = new SurvivorshipManager(SampleData.RULE_PATH,
+        manager = new SurvivorshipManager(
+                SampleData.RULE_PATH,
                 SampleDataConflictShortest2OtherColumnDuplicateSurvivedValue.PKG_NAME_CONFLICT_TWO_TARGET_SAME_RESULT_REFERENCE_COLUMN);
 
         for (String str : SampleDataConflict.COLUMNS_CONFLICT.keySet()) {
-            manager.addColumn(str, SampleDataConflict.COLUMNS_CONFLICT.get(str));
+            Column column = new Column(str, SampleDataConflict.COLUMNS_CONFLICT.get(str));
+            if (column.getName().equals("city1") || column.getName().equals("city2")) { //$NON-NLS-1$ //$NON-NLS-2$
+                for (ConflictRuleDefinition element : SampleDataConflictShortest2OtherColumnDuplicateSurvivedValue.RULES_CONFLICT_RESOLVE) {
+                    if (column.getName().equals(element.getTargetColumn())) {
+                        column.getConflictResolveList().add(element);
+                    }
+                }
+            }
+            manager.getColumnList().add(column);
         }
         for (RuleDefinition element : SampleDataConflictShortest2OtherColumnDuplicateSurvivedValue.RULES_CONFLICT_TWO_TARGET_SAME_RESULT_REFERENCE_COLUMN) {
             manager.addRuleDefinition(element);

@@ -31,7 +31,13 @@ public class SurvivedValuePassAction extends AbstractSurvivoredAction {
         Integer survivedValueIndex = survivorIndexMap.get(refColumn);
         Object refSurvivedValue = actionParameter.getDataset().getRecordList().get(survivedValueIndex).getAttribute(refColumn)
                 .getValue();
-        return actionParameter.getInputData().equals(refSurvivedValue);
+        Object inputData = actionParameter.getInputData();
+        if (inputData == null && refSurvivedValue == null) {
+            return true;
+        } else if (inputData != null && refSurvivedValue != null) {
+            return inputData.equals(refSurvivedValue);
+        }
+        return false;
     }
 
 }

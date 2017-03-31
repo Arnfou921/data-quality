@@ -24,12 +24,12 @@ public class SampleDataConflictOtherColumn2MostCommon2Constant {
 
     public static final String PKG_NAME_CONFLICT_FRE_NULL_CONSTANT = "org.talend.survivorship.conflict.fre_null_constant"; //$NON-NLS-1$
 
-    public static final RuleDefinition[] RULES_CONFLICT_FRE_NULL_CONTSTANT = {
-            new RuleDefinition(Order.SEQ, "more_common_lastName", "lastName", //$NON-NLS-1$ //$NON-NLS-2$
-                    Function.MostCommon, null, "lastName", false) }; //$NON-NLS-1$
+    public static final RuleDefinition[] RULES_CONFLICT_FRE_NULL_CONTSTANT = { new RuleDefinition(Order.SEQ,
+            "more_common_lastName", "lastName", //$NON-NLS-1$ //$NON-NLS-2$
+            Function.MostCommon, null, "lastName", false) }; //$NON-NLS-1$
 
-    public static final ConflictRuleDefinition[] RULES_CONFLICT_RESOLVE = {
-            new ConflictRuleDefinition(Order.SEQ, "more_common_lastName", "lastName", //$NON-NLS-1$ //$NON-NLS-2$
-                    Function.Exclusiveness, "Green,Blue", "lastName", false, "firstName", false) }; //$NON-NLS-1$ //$NON-NLS-2$
+    public static final ConflictRuleDefinition[] RULES_CONFLICT_RESOLVE = { new ConflictRuleDefinition(Order.SEQ,
+            "more_common_lastName", "lastName", //$NON-NLS-1$ //$NON-NLS-2$
+            Function.Exclusiveness, "Green,Blue", "lastName", false, "firstName", false) }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 }

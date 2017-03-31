@@ -48,4 +48,13 @@ public class SubDataSet extends DataSet {
         return null;
     }
 
+    /**
+     * Getter for dataSetIndex.
+     * 
+     * @return the dataSetIndex
+     */
+    public List<Integer> getDataSetIndex() {
+        return this.dataSetIndex;
+    }
+
 }

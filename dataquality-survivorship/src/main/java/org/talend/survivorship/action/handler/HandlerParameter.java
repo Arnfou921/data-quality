@@ -64,13 +64,15 @@ public class HandlerParameter {
      */
     private boolean isIgnoreBlank;
 
+    private boolean isDealDup;
+
     private Map<String, Integer> columnIndexMap;
 
     /**
      * create by zshen org.talend.survivorship.action.handler.HandlerParameter constructor comment.
      */
     public HandlerParameter(DataSet dataset, ISurvivoredAction action, Column refColumn, Column tarColumn, String ruleName,
-            String expression, boolean isIgnoreBlank, Map<String, Integer> columnIndexMap, String fillColumn) {
+            String expression, boolean isIgnoreBlank, Map<String, Integer> columnIndexMap, String fillColumn, boolean isDealDup) {
         this.dataset = dataset;
         this.action = action;
         this.refColumn = refColumn;
@@ -80,6 +82,7 @@ public class HandlerParameter {
         this.isIgnoreBlank = isIgnoreBlank;
         this.columnIndexMap = columnIndexMap;
         this.fillColumn = fillColumn;
+        this.isDealDup = isDealDup;
     }
 
     public Object getRefInputData(Object[] inputDatas) {
@@ -267,6 +270,15 @@ public class HandlerParameter {
      */
     public String getFillColumn() {
         return this.fillColumn;
+    }
+
+    /**
+     * Getter for isDealDup.
+     * 
+     * @return the isDealDup
+     */
+    public boolean isDealDup() {
+        return this.isDealDup;
     }
 
 }

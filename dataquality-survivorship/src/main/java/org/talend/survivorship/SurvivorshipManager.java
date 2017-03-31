@@ -347,7 +347,7 @@ public class SurvivorshipManager extends KnowledgeManager {
     private MCCRHandler CreateMCHandler(RuleDefinition rd) {
         return new MCCRHandler(new HandlerParameter(dataset, rd.getFunction().getAction(),
                 getColumnByName(rd.getReferenceColumn()), getColumnByName(rd.getTargetColumn()), rd.getRuleName(),
-                rd.getOperation(), rd.isIgnoreBlanks(), getColumnIndexMap(), null));
+                rd.getOperation(), rd.isIgnoreBlanks(), getColumnIndexMap(), null, false));
     }
 
     /**
@@ -359,7 +359,7 @@ public class SurvivorshipManager extends KnowledgeManager {
     private MTCRHandler createMTHandler(RuleDefinition perviousSEQRd, RuleDefinition rd) {
         return new MTCRHandler(new HandlerParameter(dataset, perviousSEQRd.getFunction().getAction(),
                 getColumnByName(perviousSEQRd.getReferenceColumn()), getColumnByName(rd.getTargetColumn()),
-                perviousSEQRd.getRuleName(), rd.getOperation(), rd.isIgnoreBlanks(), getColumnIndexMap(), null));
+                perviousSEQRd.getRuleName(), rd.getOperation(), rd.isIgnoreBlanks(), getColumnIndexMap(), null, false));
     }
 
     /**

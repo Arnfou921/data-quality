@@ -116,7 +116,7 @@ public class DataSet {
     }
 
     private void initServices() {
-        // TODO use the same services instead of creating new instance for each data group.
+        // only data is keep use same one
         fs = new FrequencyService(this);
         ss = new StringService(this);
         ts = new TimeService(this);
@@ -209,13 +209,14 @@ public class DataSet {
                         String cRuleName = ruleDef.getRuleName();
                         boolean isIgnoreBlank = ruleDef.isIgnoreBlanks();
                         String fillColumn = ruleDef.getFillColumn();
+                        boolean isDealDup = ruleDef.isDuplicateSurCheck();
                         CRCRHandler newCrcrHandler = new CRCRHandler(new HandlerParameter(this, action, refColumn, tarColumn,
-                                cRuleName, expression, isIgnoreBlank, this.getColumnIndexMap(), fillColumn));
+                                cRuleName, expression, isIgnoreBlank, this.getColumnIndexMap(), fillColumn, isDealDup));
                         if (crcrHandler == null) {
                             this.chainMap.put(columnName, newCrcrHandler);
                         }
-                        crcrHandler = crcrHandler == null ? newCrcrHandler
-                                : (CRCRHandler) crcrHandler.linkSuccessor(newCrcrHandler);
+                        crcrHandler = crcrHandler == null ? newCrcrHandler : (CRCRHandler) crcrHandler
+                                .linkSuccessor(newCrcrHandler);
                     }
                 }
                 // store conflict data
@@ -303,14 +304,34 @@ public class DataSet {
             if (crcrHandler != null) {
                 SurvivedResult survivoredRowNum = crcrHandler.getSurvivoredRowNum();
                 if (survivoredRowNum != null) {
-                    Attribute attribute = recordList.get(survivoredRowNum.getRowNum())
-                            .getAttribute(survivoredRowNum.getColumnName());
-                    survivorMap.put(conflictCol, attribute.getValue());
+                    Attribute attribute = recordList.get(survivoredRowNum.getRowNum()).getAttribute(
+                            survivoredRowNum.getColumnName());
+                    Object survivedVlaue = attribute.getValue();
+                    if (crcrHandler.getHandlerParameter().isDealDup() && checkDupSurValue(survivedVlaue)) {
+                        survivedVlaue = crcrHandler.getNonDupResult(survivedVlaue);
+                    }
+                    survivorMap.put(conflictCol, survivedVlaue);
                     survivorIndexMap.put(conflictCol, survivoredRowNum.getRowNum());
                 }
             }
         }
 
+    }
+
+    /**
+     * DOC zshen Comment method "checkDupSurValue".
+     * 
+     * @param value
+     * @return
+     */
+    private boolean checkDupSurValue(Object value) {
+        Iterator<Object> iterator = survivorMap.values().iterator();
+        while (iterator.hasNext()) {
+            if (value.equals(iterator.next())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
