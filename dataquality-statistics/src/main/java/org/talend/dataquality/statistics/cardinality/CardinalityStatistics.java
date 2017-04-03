@@ -24,12 +24,24 @@ public class CardinalityStatistics extends AbstractCardinalityStatistics {
 
     private final Set<String> distinctData = new HashSet<>();
 
+    public CardinalityStatistics() {
+    }
+
+    public CardinalityStatistics(int count, HashSet<String> distinctData) {
+        super.count = count;
+        this.distinctData.addAll(distinctData);
+    }
+
     public void add(String colStr) {
         distinctData.add(colStr);
     }
 
     public long getDistinctCount() {
         return distinctData.size();
+    }
+
+    public Set<String> getDistinctData() {
+        return this.distinctData;
     }
 
     /**
